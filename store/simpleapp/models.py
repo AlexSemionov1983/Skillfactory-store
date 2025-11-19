@@ -7,7 +7,7 @@ from django.core.validators import MinValueValidator
 class Product(models.Model):
     name = models.CharField(max_length=50, unique=True)
     description = models.TextField()
-    quantity = models.IntegerField(validators=MinValueValidator(0))
+    quantity = models.IntegerField(validators=[MinValueValidator(0)])
     category = models.ForeignKey(
         to='Category',
         on_delete=models.CASCADE,
