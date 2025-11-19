@@ -7,7 +7,7 @@ from django.core.validators import MinValueValidator
 class Product(models.Model):
     name = models.CharField(max_length=50, unique=True)
     description = models.TextField()
-    quantity = models.IntegerField(MinValueValidator(0))
+    quantity = models.IntegerField(validators=MinValueValidator(0))
     category = models.ForeignKey(
         to='Category',
         on_delete=models.CASCADE,
@@ -16,7 +16,7 @@ class Product(models.Model):
     price = models.FloatField(validators=[MinValueValidator(0.0)])
 
     def __str__(self):
-        return f'{self.name}: {self.quantity}'
+        return f'{self.name}: {self.description}. Всего {self.quantity}'
 
 
 # Категория, к которой будет привязываться товар
