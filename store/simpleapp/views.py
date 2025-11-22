@@ -3,6 +3,7 @@
 from django.views.generic import ListView, DetailView
 from .models import Product
 from datetime import datetime
+from .filters import ProductFilter
 
 
 class ProductsList(ListView):
@@ -16,7 +17,13 @@ class ProductsList(ListView):
     # Это имя списка, в котором будут лежать все объекты.
     # Его надо указать, чтобы обратиться к списку объектов в html-шаблоне.
     context_object_name = 'products'
-    paginate_by = 1  # ← количество товаров на странице
+    paginate_by = 4  # ← количество товаров на странице
+
+    def get_filter(self):
+        return ProductFilter(self.request.GET, queryset=super().get_queryset())
+
+    def get_queryset(self):
+        return self.get_filter().qs
 
     # Метод get_context_data позволяет нам изменить набор данных,
     # который будет передан в шаблон.
@@ -27,11 +34,12 @@ class ProductsList(ListView):
         # В ответе мы должны получить словарь.
         context = super().get_context_data(**kwargs)
         # К словарю добавим текущую дату в ключ 'time_now'.
-        context['time_now'] = datetime.utcnow()
+        context['time_now'] = datetime.now()
         # Добавим ещё одну пустую переменную,
         # чтобы на её примере рассмотреть работу ещё одного фильтра.
         # context['next_sale'] = None
         context['next_sale'] = 'Распродажа в среду!'
+        context['filter'] = self.get_filter()
         return context
 
 

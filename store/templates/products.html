@@ -12,6 +12,18 @@ Products
 
     <h3>{% current_time %}</h3>
     <h3>{{ next_sale|default_if_none:"Чуть позже сообщим о распродаже!" }}</h3>
+    <hr>
+    <form method="GET" class="form-inline mb-3 d-flex gap-2">
+
+    {% for field in filter.form %}
+        <div class="form-group">
+            {{ field.label_tag }}
+            {{ field }}
+        </div>
+    {% endfor %}
+
+    <button class="btn btn-primary" type="submit">Найти</button>
+    </form>
 
     <hr>
 
