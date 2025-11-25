@@ -5,19 +5,20 @@ from django.core.validators import MinValueValidator
 
 # Товар для нашей витрины
 class Product(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=200, unique=True)
     description = models.TextField()
-    quantity = models.IntegerField(MinValueValidator(0))
+    quantity = models.IntegerField(validators=[MinValueValidator(0, 'Quantity should be >= 0')])
     category = models.ForeignKey(
-        to='Category',
+        'Category',
         on_delete=models.CASCADE,
-        related_name='products',  # все продукты в категории будут доступны через поле products
     )
     price = models.FloatField(validators=[MinValueValidator(0.0)])
 
     def __str__(self):
         return f'{self.name}: {self.quantity}'
 
+    def get_absolute_url(self):
+        return f'/products/{self.id}'
 
 # Категория, к которой будет привязываться товар
 class Category(models.Model):
@@ -25,4 +26,3 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name.title()
-

@@ -1,64 +1,65 @@
-<!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
 {% extends 'flatpages/default.html' %}
-
-{% load custom_filters %}
-<!-- Подключаем новый файл с нашим тегом -->
-{% load custom_tags %}
-
-<!-- Название у нас будет products -->
-{% block title %}
-Products
-{% endblock title %}
+{% block title %} Product list {% endblock title %}
 
 {% block content %}
-    <h1>Все товары</h1>
-    <!-- Используем переданную из представления переменную time_now
-    и применяем к ней фильтр date. По назначению этот фильтр очень похож
-    на метод strftime у объекта datetime в Python — вывод времени
-    в указанном формате. -->
-    <!-- <h3>{{ time_now|date:'M d Y' }}</h3> -->
-    <h3>{% current_time '%b %d %Y' %}</h3>
-    <h3> {{ next_sale|default_if_none:"Чуть позже сообщим о распродаже!" }} </h3>
-    <hr>
-    {% if products %}
-    <table> <!-- Начинаем описывать таблицу -->
-        <tr> <!-- Добавляем строку -->
-            <td> <!-- Добавляем ячейку в строку -->
-                Название
-            </td>
-            <td> <!-- Добавляем ещё одну ячейку в строку и так далее -->
-                Описание
-            </td>
-            <td>
-                Категория
-            </td>
-            <td>
-                Цена
-            </td>
-            <td>
-                Количество
-            </td>
-        </tr> <!-- Не забываем закрыть HTML-тег строки -->
 
-        <!-- Для каждого товара будете генерироваться новая строчка,
-        т.е. новый HTML код, который указан в теле цикла.
-        При этом сам цикл работает точно так же, как и в Python.
-        product — переменная цикла, т.е. наш товар полученный из списка -->
-        {% for product in products %}
-        <tr>
-            <!-- Не забываем, что переменные в шаблоне ничем не отличаются
-            от переменных в Python. Здесь также можно получать доступ к
-            полям объекта модели. Например, здесь мы выводим имя,
-            в следующем столбце описание, и т.д.  -->
-            <td>{{ product.name }}</td>
-            <td>{{ product.description|truncatechars:15 }}</td>
-            <td>{{ product.category.name }}</td>
-            <td>{{ product.price|currency }}</td>
-            <td>{{ product.quantity }}</td>
-        </tr>
-        {% endfor %}
-    </table> <!-- ... и таблицы -->
-    {% else %}
-        <h2>Товаров нет!</h2>
+<table>
+    <thead>
+        <th>
+            Name
+        </th>
+        <th>
+            Category
+        </th>
+        <th>
+            Price
+        </th>
+        <th>
+            Quantity
+        </th>
+    </thead>
+    {% for product in filter.qs %} <!-- поменяем products на filter.qs, т.к. теперь мы забираем уже отобранную по каким-то параметрам информацию -->
+    <tr>
+        <td>
+            <a href="{% url 'product_detail' product.id %}">{{ product.name|title }}</a> <!-- При нажатии на имя товара в таблице нас теперь будет перекидывать на страницу с самого товара -->
+            <a href="{% url 'product_update' product.id %}"><u>Редактировать</u></a> <!-- добавим ссылку на редактирование товара-->
+
+            <a href="{% url 'product_delete' product.id %}"><u> Удалить </u></a> <!-- добавим ссылку на удаление товара-->
+        </td>
+        <td>
+            {{ product.category.name|title }}
+        </td>
+        <td>
+            {{ product.price }}
+        </td>
+        <td>
+            {{ product.quantity }}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<a href="{% url 'product_create' %}">Добавить новый товар</a> <br>
+
+
+{% if is_paginated %}
+
+    {% if page_obj.has_previous %}
+        <a href="?page=1">First</a>
+        <a href="?page={{ page_obj.previous_page_number }}"><<<</a>
     {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+            <a>{{ num }}</a>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}            <a href="?page={{ num }}">{{ num }}</a>        {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">>>></a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+    {% endif %}
+{% endif %}
+<br>
+
 {% endblock content %}
