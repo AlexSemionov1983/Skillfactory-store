@@ -13,33 +13,43 @@ Products
     <h3>{% current_time %}</h3>
     <h3>{{ next_sale|default_if_none:"Чуть позже сообщим о распродаже!" }}</h3>
     <hr>
-    <form method="GET" class="form-inline mb-3 d-flex gap-2">
+    <form method="GET" class="d-flex gap-2 mb-3 flex-wrap">
 
     {% for field in filter.form %}
-        <div class="form-group">
-            {{ field.label_tag }}
-            {{ field }}
+        <div class="d-flex align-items-center me-2" style="flex-wrap: nowrap;">
+            <label class="me-1 mb-0" style="white-space: nowrap;">
+                {{ field.label }}
+            </label>
+
+            <div style="width: 130px; flex: 0 0 130px;">
+                {{ field|add_class:"form-control form-control-sm p-1" }}
+            </div>
         </div>
     {% endfor %}
 
-    <button class="btn btn-primary" type="submit">Найти</button>
+    <button class="btn btn-primary btn-sm">Найти</button>
     </form>
 
     <hr>
 
     {% if products %}
     <table class="table table-bordered table-hover">
-        <tr>
+        <thead>
             <th>Название</th>
             <th>Описание</th>
             <th>Категория</th>
             <th>Цена</th>
             <th>Количество</th>
-        </tr>
+        </thead>
 
-        {% for product in products %}
+        {% for product in filter.qs %}  <!-- поменяем products на filter.qs, т. к. теперь мы забираем уже отобранную по каким-то параметрам информацию -->
         <tr>
-            <td>{{ product.name }}</td>
+            <td>
+                <a href="{% url 'product_detail' product.id %}">{{ product.name|title }}</a> <!-- При нажатии на имя товара в таблице нас теперь будет перекидывать на страницу с информацией о товаре -->
+                <a href="{% url 'product_update' product.id %}"><u>Редактировать</u></a> <!-- добавим ссылку на редактирование товара-->
+
+                <a href="{% url 'product_delete' product.id %}"><u> Удалить </u></a> <!-- добавим ссылку на удаление товара-->
+            </td>
             <td>{{ product.description|truncatechars:15 }}</td>
             <td>{{ product.category.name }}</td>
             <td>{{ product.price|currency }}</td>
@@ -47,6 +57,15 @@ Products
         </tr>
         {% endfor %}
     </table>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form }} <!-- Теперь нам нужна только готовая форма и кнопка -->
+        <input type="button"
+            value="Добавить товар"
+            onclick="window.location.href="{% url 'product_create' %}">
+    </form>
+
+    <br>
 
     <!-- ПАГИНАТОР -->
     <nav aria-label="Page navigation">
@@ -100,5 +119,4 @@ Products
     {% else %}
         <h2>Товаров нет!</h2>
     {% endif %}
-
 {% endblock content %}

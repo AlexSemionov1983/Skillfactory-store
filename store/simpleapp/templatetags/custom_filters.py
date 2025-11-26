@@ -19,3 +19,8 @@ def currency(value, code='rub'):
     postfix = CURRENCIES_SYMBOLS[code]
     # Возвращаемое функцией значение подставится в шаблон.
     return f'{value} {postfix}'
+
+@register.filter(name='add_class')
+def add_class(field, css):
+    """Добавляет CSS-класс к полю формы."""
+    return field.as_widget(attrs={"class": css})
